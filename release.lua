@@ -1,4 +1,5 @@
 #!/usr/bin/lua
+local VERSION = 1
 -- lua5.2 release script for factorio mods
 -- by folk@folk.wtf
 -- Requires https://github.com/zserge/luash and https://github.com/whiteinge/ok.sh
