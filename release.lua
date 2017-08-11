@@ -63,5 +63,5 @@ local zip = tuple .. ".zip"
 git("archive", "--prefix=" .. tuple .. "/", "--output=" .. zip, "HEAD")
 
 if type(id) == "string" and id:len() ~= 0 then
-	oksh("-vvv", "upload_asset", userId, repo, id, zip, "filename=" .. zip, "mime_type=application/zip")
+	oksh("upload_asset", userId, repo, id, zip, "filename=" .. zip, "mime_type=application/zip")
 end
