@@ -1,5 +1,5 @@
 #!/usr/bin/lua
-local VERSION = 3
+local VERSION = 4
 -- lua5.2 release script for factorio mods
 -- by folk@folk.wtf
 -- Requires https://github.com/zserge/luash, https://github.com/whiteinge/ok.sh, and https://stedolan.github.io/jq/
@@ -55,7 +55,7 @@ local tag = "v" .. version
 git("tag", tag)
 git("push", "origin", tag) -- Commit the tag before we do the release post
 
-local repo = _(git("rev-parse", "--show-toplevel")):match("^.*/(%w+)$")
+local repo = _(git("rev-parse", "--show-toplevel")):match("^.*/([%w%-%_]+)$")
 local id = _(jq(oksh("-j", "create_release", userId, repo, tag, changes), "'.id'"))
 
 local tuple = name .. "_" .. version
