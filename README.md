@@ -10,9 +10,7 @@ Lua script for releasing github-hosted Factorio mods.
 4. Tags "vX.Y.Z"
 5. Releases that tag, ZIPs it, and uploads it to the GH release
 
-This actually depends on my fork of https://github.com/folknor/ok.sh for a single fix - until merged into mainline.
-
-Requires https://github.com/zserge/luash, https://stedolan.github.io/jq/, and my ok.sh fork.
+Requires https://github.com/zserge/luash, https://stedolan.github.io/jq/, and https://github.com/whiteinge/ok.sh
 Please remember to set up ok.sh properly.
 
 Invoke the script like so:
