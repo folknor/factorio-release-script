@@ -1,5 +1,5 @@
 #!/usr/bin/lua
-local VERSION = 4
+local VERSION = 5
 -- lua5.2 release script for factorio mods
 -- by folk@folk.wtf
 -- Requires https://github.com/zserge/luash, https://github.com/whiteinge/ok.sh, and https://stedolan.github.io/jq/
@@ -9,6 +9,7 @@ local VERSION = 4
 local userId = "folknor"
 local sh = require("sh")
 local _ = tostring
+local curl = sh.command("curl")
 local source = _(curl("-s", "https://raw.githubusercontent.com/folknor/factorio-release-script/master/release.lua"))
 if type(source) == "string" then
 	local currentVersion = tonumber(source:match("local VERSION = (%d+)"))
@@ -22,19 +23,29 @@ if type(source) == "string" then
 		if answer == "y" then return end
 	end
 end
+local git = sh.command("git")
+local cat = sh.command("cat")
+local sed = sh.command("sed")
+local jq  = sh.command("jq")
 
 local oksh = sh.command("ok.sh")
 local function exit(...) io.write(..., "\n") os.exit() end
 local maj, min, patch = tonumber((select(1, ...))), tonumber((select(2, ...))), tonumber((select(3, ...)))
-if type(maj) ~= "number" or type(min) ~= "number" or type(patch) ~= "number" then exit("Please provide an additive version number bump, like 0 0 10, 0 1 0, 1 0 2, or 0 0 0 for no bump.") end
+if type(maj) ~= "number" or type(min) ~= "number" or type(patch) ~= "number" then
+	exit("Please provide an additive version number bump, like 0 0 10, 0 1 0, 1 0 2, or 0 0 0 for no bump.")
+end
 local mod = _(cat("info.json"))
 local name = mod:match("\"name\":%s+\"(%S+)\"")
 if type(name) ~= "string" or name:len() < 5 then exit("Could not parse name from info.json.") end
-local oMaj, oMin, oPatch = tonumber(mod:match("\"version\":%s+\"(%d+).%d+.%d+\"")), tonumber(mod:match("\"version\":%s+\"%d+.(%d+).%d+\"")), tonumber(mod:match("\"version\":%s+\"%d+.%d+.(%d+)\""))
-if type(oMaj) ~= "number" or type(oMin) ~= "number" or type(oPatch) ~= "number" then exit("Failed to parse mod version from info.json.") end
+local oMaj = tonumber(mod:match("\"version\":%s+\"(%d+).%d+.%d+\""))
+local oMin = tonumber(mod:match("\"version\":%s+\"%d+.(%d+).%d+\""))
+local oPatch = tonumber(mod:match("\"version\":%s+\"%d+.%d+.(%d+)\""))
+if type(oMaj) ~= "number" or type(oMin) ~= "number" or type(oPatch) ~= "number" then
+	exit("Failed to parse mod version from info.json.")
+end
 
 local lastTag = _(git("describe", "--tags", "--abbrev=0", "HEAD^"))
-local changes = nil
+local changes
 if lastTag:len() ~= 0 then
 	changes = "body=\"" .. _(git("log", lastTag .. "..HEAD", "--pretty=format:\"* %s\"")) .. "\""
 else
